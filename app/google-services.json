@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "974402873057",
+    "firebase_url": "https://try2maps.firebaseio.com",
+    "project_id": "try2maps",
+    "storage_bucket": "try2maps.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:974402873057:android:b297aaba1bd9ba2de979a0",
+        "android_client_info": {
+          "package_name": "com.example.thamartex_firebase"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "974402873057-4f7cmhbs86v6on0eqjp4m904ia5osnj0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.thamartex_firebase",
+            "certificate_hash": "c4cabf4a15ee441b813f66586a2d4c4a1b19e14a"
+          }
+        },
+        {
+          "client_id": "974402873057-irbhoth19lidji927b1dcpnj8kscmva3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAIP61onvVJpRHCQAxfouUfuUWDZ4lFDnA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "974402873057-irbhoth19lidji927b1dcpnj8kscmva3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
