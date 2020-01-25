@@ -1,6 +1,7 @@
 package com.example.thamartex_firebase;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.ContentResolver;
@@ -30,11 +31,15 @@ import com.google.firebase.storage.StorageTask;
 import com.google.firebase.storage.UploadTask;
 import com.squareup.picasso.Picasso;
 
+import java.util.HashMap;
+
 
 public class MainActivity extends AppCompatActivity {
 DatabaseReference databaseReference;
 long maxid=0;
-Button button;
+Button button,view;
+    private StorageReference Folder;
+    private  static final int ImageBack=1;
     private Button mButtonChooseImage;
     private Button mButtonUpload;
     private TextView mTextViewShowUploads,mEditTextFileName ;
@@ -67,7 +72,7 @@ Button button;
                 addartist();
             }
         });
-
+        Folder= FirebaseStorage.getInstance().getReference().child("ImageFolder");
         mButtonChooseImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -79,11 +84,17 @@ Button button;
             public void onClick(View v) {
                 uploadFile();
             }});
-
+view=findViewById(R.id.view);
+view.setOnClickListener(new View.OnClickListener() {
+    @Override
+    public void onClick(View v) {
+        openImagesActivity();
+    }
+});
         mTextViewShowUploads.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                openImagesActivity();
+               UploadData();
             }
         });
 
@@ -117,22 +128,27 @@ Button button;
     startActivityForResult(intent, PICK_IMAGE_REQUEST);
 }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK
-                && data != null && data.getData() != null) {
-            mImageUri = data.getData();
-
-            Picasso.get().load(mImageUri).into(mImageView);
-        }
-    }
+//    @Override
+//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+//        super.onActivityResult(requestCode, resultCode, data);
+//
+//        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK
+//                && data != null && data.getData() != null) {
+//            mImageUri = data.getData();
+//
+//            Picasso.get().load(mImageUri).into(mImageView);
+//        }
+//    }
 
     private String getFileExtension(Uri uri) {
         ContentResolver cR = getContentResolver();
         MimeTypeMap mime = MimeTypeMap.getSingleton();
         return mime.getExtensionFromMimeType(cR.getType(uri));
+    }
+    public void UploadData(){
+        Intent intent=new Intent((Intent.ACTION_GET_CONTENT));
+        intent.setType("image/*");
+        startActivityForResult(intent,ImageBack);
     }
 
     private void uploadFile() {
@@ -154,7 +170,7 @@ Button button;
 
                             Toast.makeText(MainActivity.this, "Upload successful", Toast.LENGTH_LONG).show();
                             Upload upload = new Upload(mEditTextFileName.getText().toString().trim(),
-                                    taskSnapshot.getStorage().getDownloadUrl().toString());
+                                    taskSnapshot.getMetadata().getReference().getDownloadUrl().toString());
                             String uploadId = mDatabaseRef.push().getKey();
                             mDatabaseRef.child(uploadId).setValue(upload);
                         }
@@ -181,4 +197,40 @@ Button button;
         startActivity(intent);
     }
 
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode==ImageBack){
+            if(resultCode==RESULT_OK){
+                Uri ImageData=data.getData();
+                final     StorageReference Imagename=Folder.child("image"+ImageData.getLastPathSegment());
+                Imagename.putFile(ImageData).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        Imagename.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                            @Override
+                            public void onSuccess(Uri uri) {
+                                DatabaseReference imagestore= FirebaseDatabase.getInstance().getReference().child("uploads");
+                                Upload upload = new Upload("name",
+                                        String.valueOf(uri));
+                                String uploadId = imagestore.push().getKey();
+                               // mDatabaseRef.child(uploadId).setValue(upload);
+//                                HashMap<String,String> hashMap=new HashMap<>();
+//                                hashMap.put("imageUrl",String.valueOf(uri));
+                                imagestore.child(uploadId).setValue(upload).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                    @Override
+                                    public void onSuccess(Void aVoid) {
+                                        Toast.makeText(MainActivity.this, "finally uploaded", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+
+                            }
+                        });
+                    }
+                });
+            }
+        }
+
+    }
 }
